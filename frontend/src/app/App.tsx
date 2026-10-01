@@ -85,7 +85,7 @@ const App = () => {
     engineDepth: 15,
     numberOfLines: 3,
   };
-  const [settings, setSettings] = useState<Settings>(defaultSettings);
+  const [settings, setSettings] = useState<Settings>(getUserSettings);
 
   const captureSoundRef = useRef(new Audio(captureSound));
   const castleSoundRef = useRef(new Audio(castleSound));
@@ -193,6 +193,35 @@ const App = () => {
       copy[0] = evaluationResult;
       return copy;
     });
+  }
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("user-settings", JSON.stringify(settings));
+    } catch (error) {
+      console.error("Could not save settings: ", error);
+    }
+  }, [settings]);
+
+  function getUserSettings() {
+    try {
+      const savedSettings = localStorage.getItem("user-settings");
+      if (!savedSettings) {
+        return defaultSettings;
+      }
+
+      return JSON.parse(savedSettings);
+    } catch (error) {
+      console.error("Could not load settings:", error);
+      return defaultSettings;
+    }
+  }
+
+  function updateSettings(newSettings: Partial<Settings>) {
+    setSettings((prev) => ({
+      ...prev,
+      ...newSettings,
+    }));
   }
 
   function gotoBeginning() {
@@ -1019,13 +1048,6 @@ const App = () => {
 
   function onFlipBoard() {
     setBoardOrientation((prev) => (prev === "white" ? "black" : "white"));
-  }
-
-  function updateSettings(newSettings: Partial<Settings>) {
-    setSettings((prev) => ({
-      ...prev,
-      ...newSettings,
-    }));
   }
 
   function isGameOverFen(fen: string) {
