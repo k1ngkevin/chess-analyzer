@@ -63,7 +63,7 @@ const App = () => {
     NullableMoveClassification[]
   >([]);
 
-  const [pgn, setPgn] = useState("");
+  const [pgn, setPgn] = useState(getSavedPgn);
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState<ImportProgress | null>(
     null,
@@ -222,6 +222,28 @@ const App = () => {
       ...prev,
       ...newSettings,
     }));
+  }
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("pgn", pgn);
+    } catch (error) {
+      console.error("Failed to save pgn: ", error);
+    }
+  });
+
+  function getSavedPgn() {
+    try {
+      const savedPgn = localStorage.getItem("pgn");
+      if (!savedPgn) {
+        return "";
+      }
+
+      return savedPgn;
+    } catch (error) {
+      console.error("Couldn't load pgn", error);
+      return "";
+    }
   }
 
   function gotoBeginning() {
