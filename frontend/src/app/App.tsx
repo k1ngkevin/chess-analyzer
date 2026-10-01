@@ -63,7 +63,7 @@ const App = () => {
     NullableMoveClassification[]
   >([]);
 
-  const [pgn, setPgn] = useState("");
+  const [pgn, setPgn] = useState(getSavedPgn);
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState<ImportProgress | null>(
     null,
@@ -85,7 +85,7 @@ const App = () => {
     engineDepth: 15,
     numberOfLines: 3,
   };
-  const [settings, setSettings] = useState<Settings>(defaultSettings);
+  const [settings, setSettings] = useState<Settings>(getUserSettings);
 
   const captureSoundRef = useRef(new Audio(captureSound));
   const castleSoundRef = useRef(new Audio(castleSound));
@@ -193,6 +193,57 @@ const App = () => {
       copy[0] = evaluationResult;
       return copy;
     });
+  }
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("user-settings", JSON.stringify(settings));
+    } catch (error) {
+      console.error("Could not save settings: ", error);
+    }
+  }, [settings]);
+
+  function getUserSettings() {
+    try {
+      const savedSettings = localStorage.getItem("user-settings");
+      if (!savedSettings) {
+        return defaultSettings;
+      }
+
+      return JSON.parse(savedSettings);
+    } catch (error) {
+      console.error("Could not load settings:", error);
+      return defaultSettings;
+    }
+  }
+
+  function updateSettings(newSettings: Partial<Settings>) {
+    setSettings((prev) => ({
+      ...prev,
+      ...newSettings,
+    }));
+  }
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("pgn", pgn);
+    } catch (error) {
+      console.error("Failed to save pgn: ", error);
+    }
+  });
+
+  function getSavedPgn() {
+    try {
+      const savedPgn = localStorage.getItem("pgn");
+      if (!savedPgn) {
+        return "";
+      }
+
+      return savedPgn;
+    } catch (error) {
+      console.error("Couldn't load pgn", error);
+      return "";
+    }
   }
 
   function gotoBeginning() {
@@ -1019,13 +1070,6 @@ const App = () => {
 
   function onFlipBoard() {
     setBoardOrientation((prev) => (prev === "white" ? "black" : "white"));
-  }
-
-  function updateSettings(newSettings: Partial<Settings>) {
-    setSettings((prev) => ({
-      ...prev,
-      ...newSettings,
-    }));
   }
 
   function isGameOverFen(fen: string) {
