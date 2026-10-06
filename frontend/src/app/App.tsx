@@ -500,13 +500,17 @@ const App = () => {
             const bestMoveValue = bestMoveToCentipawn(bestMove);
             const playedMoveValue = evaluationToCentipawn(playedEval);
             const sideToMove = getSideToMove(fenBefore);
-            const beforeEval = playedMovesEval[i + j];
             const afterEval = playedEval;
 
             if (bestMoveValue === null) {
               classificationsCopy[i + j] = null;
               return;
             }
+
+            const beforeEval: EngineEvaluation =
+              bestMove.mate != null
+                ? { type: "mate", value: bestMove.mate }
+                : { type: "cp", value: bestMoveValue };
 
             classificationsCopy[i + j] = classifyMove(
               fenAfter,

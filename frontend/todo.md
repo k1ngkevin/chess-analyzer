@@ -84,6 +84,10 @@
 - update readme for the db
 - add backend pagination (if needed)
 
+- add tests
+- move the classifications in the lib
+  ~~- fix blunders in forced mate~~<br>
+
 ### classifications
 
 - add great
